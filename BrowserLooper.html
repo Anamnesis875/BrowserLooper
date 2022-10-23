@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>browserLooper</title>
+  </head>
+  <body>
+    <button id="kick" onclick="playKick(0)">KICK</button>
+    <button id="sample" onclick="playSample(0)">PLAY SAMPLE</button>
+    <button id="Start" onclick="Start(0)">START</button>
+    <button id="Stop" onclick="Stop(0)">STOP</button>
+	<form>
+		<label for="bpm">BPM:</label>
+		<input type="number" id="bpm" name="bpm" value="60">
+	</form>
+	<p>Секвенсор</p>
+	<div>
+		<label>Kick</label>
+		<input type="checkbox" id="cb1">
+		<input type="checkbox" id="cb2">
+		<input type="checkbox" id="cb3">
+		<input type="checkbox" id="cb4">
+	</div>
+	<div>
+		<label>Snare</label>
+		<input type="checkbox">
+		<input type="checkbox">
+		<input type="checkbox">
+		<input type="checkbox">
+	</div>
+  </body>
+  <script>
+    clicker = 0;
+    function playKick(time)
+    {
+	const context = new AudioContext()
+
+	const osc = context.createOscillator()
+	const gain = context.createGain()
+	osc.connect(gain)
+	gain.connect(context.destination)
+	const universeTime = context.currentTime
+	osc.frequency.setValueAtTime(150, time)
+	gain.gain.setValueAtTime(1, time)
+	osc.frequency.exponentialRampToValueAtTime(0.01, time + 0.5)
+	gain.gain.exponentialRampToValueAtTime(0.01, time + 0.5)
+	osc.start(universeTime + time)
+	osc.stop(universeTime + time + 0.5)
+    }
+    function playSample(time)
+    {
+	var audio = new Audio('123.wav');
+	audio.play();
+    }
+    function Start()
+    {
+	var kick = 1;
+	var snare = 2;
+	const sched = [kick, 0, snare, 0];
+	var count = 0;
+	let form = document.forms[0];
+	let bpm = form.elements.bpm;
+	if(!clicker)
+	{
+	    clicker = setInterval(function()
+				  {
+				  if(sched[count]==snare)
+				      playSample(0);
+				  else if(sched[count]==kick)
+				      playKick(0);
+				  count++;
+				  if(count == sched.length)
+				      count = 0;
+				  }, (1/bpm.value)*60*1000);
+	}
+    }
+    function Stop()
+    {
+	clearInterval(clicker);
+	clicker = 0;
+    }
+  </script>
+</html>
+
